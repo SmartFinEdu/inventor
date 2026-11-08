@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>9 листопада - цікаві події</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        primary: {
+                            50: '#EEF2FF',
+                            100: '#E0E7FF',
+                            500: '#6366F1',
+                            600: '#4F46E5',
+                            800: '#3730A3'
+                        },
+                        accent: {
+                            100: '#FEF3C7',
+                            500: '#F59E0B',
+                            600: '#D97706'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; overflow: hidden; }
+        
+        /* Animations */
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .pulse-fast { animation: pulse 0.5s infinite; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 5px; }
+        ::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: #818cf8; }
+
+        /* Lightbulb Simulator */
+        .bulb-off { filter: grayscale(100%) opacity(0.3); transition: all 0.5s; text-shadow: none; }
+        .bulb-on { 
+            filter: grayscale(0%) opacity(1); 
+            transition: all 0.2s; 
+            text-shadow: 0 0 40px #F59E0B, 0 0 80px #F59E0B; 
+            transform: scale(1.1);
+        }
+
+        /* Emoji Card Flip */
+        .emoji-card {
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .emoji-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(99, 102, 241, 0.2); }
+    </style>
+</head>
+<body class="bg-primary-50 text-slate-800 h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-white shadow-md py-4 px-6 shrink-0 z-50 border-b border-primary-100">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <span class="text-4xl md:text-5xl">🏆</span>
+                <h1 class="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">
+                    9 листопада: <span class="text-primary-600">Цікаві події</span>
+                </h1>
+            </div>
+            <div class="bg-primary-100 text-primary-800 px-5 py-2 rounded-2xl font-bold text-2xl border-2 border-primary-200 shadow-sm">
+                Бали: <span id="score-display">0</span>/12
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="max-w-7xl mx-auto w-full flex-grow flex flex-col md:flex-row gap-6 p-4 md:p-6 overflow-hidden">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="w-full md:w-1/3 lg:w-1/4 shrink-0 overflow-y-auto bg-white rounded-3xl shadow-sm border-2 border-primary-50 p-4 flex flex-col gap-3" id="nav-container">
+            <!-- Navigation buttons -->
+        </aside>
+
+        <!-- Content Area -->
+        <main class="w-full md:w-2/3 lg:w-3/4 bg-white rounded-3xl shadow-sm border-2 border-primary-50 p-6 md:p-10 overflow-y-auto relative" id="content-area">
+            <!-- Dynamic content -->
+        </main>
+    </div>
+
+    <script>
+        // Global State
+        let activeBlockId = 1;
+        let score = 0;
+        let answeredQuizzes = new Set();
+
+        // Specific Simulator States
+        let clickCount = 0;
+        let clickTimer = null;
+        let clickTimeLeft = 5;
+        let gameActive = false;
+
+        let circuit = { battery: false, wire: false, switch: false };
+
+        let reactState = 'idle';
+        let reactStartTime = 0;
+        let reactTimeout = null;
+
+        // --- NEW STATES FOR SIMULATORS ---
+        let typingStart = 0;
+        let stopStart = 0;
+        let stopInterval = null;
+        let stopActive = false;
+        let memTarget = "";
+
+        const blocks = [
+            {
+                id: 1,
+                title: "1. Рекорди Гіннеса",
+                icon: "🥇",
+                render: () => `
+                    <div class="fade-in max-w-4xl mx-auto pb-10">
+                        <h2 class="text-3xl md:text-5xl font-black text-slate-800 mb-6 flex items-center gap-4">
+                            🥇 День книги рекордів Гіннеса
+                        </h2>
+                        
+                        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-3xl border-2 border-primary-100 mb-8 shadow-sm">
+                            <p class="text-2xl text-slate-700 leading-relaxed mb-4">
+                                <b>Книга рекордів Гіннеса</b> — це довідник, який виходить щорічно і містить всесвітньо визнані рекорди. Вона була створена у 1955 році.
+                            </p>
+                            <p class="text-xl text-slate-600">
+                                Сьогодні сюди потрапляють не лише досягнення людини, але й рекорди природи. <b>Цікавий факт:</b> ідея книги виникла на полюванні у 1951 році, коли директор броварні Guinness посперечався, яка пташка літає найшвидше!
+                            </p>
+                        </div>
+
+                        <!-- Simulator 1: Click Challenge -->
+                        <div class="bg-slate-900 text-white p-8 rounded-3xl border-4 border-primary-600 shadow-2xl text-center relative overflow-hidden mb-8">
+                            <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
+                            
+                            <h3 class="font-black text-3xl mb-2 text-accent-500 relative z-10">⚡ Челендж 1: Встанови власний рекорд!</h3>
+                            <p class="text-xl text-slate-300 mb-8 relative z-10">Скільки разів ти зможеш клікнути (або тапнути) по кнопці за <b>5 секунд</b>?</p>
+                            
+                            <div class="flex justify-center gap-12 mb-8 relative z-10">
+                                <div class="bg-slate-800 p-4 rounded-2xl min-w-[150px] border border-slate-700">
+                                    <div class="text-slate-400 text-lg uppercase font-bold tracking-widest">Час</div>
+                                    <div class="text-5xl font-black text-white" id="timer-display">5.0</div>
+                                </div>
+                                <div class="bg-slate-800 p-4 rounded-2xl min-w-[150px] border border-slate-700">
+                                    <div class="text-slate-400 text-lg uppercase font-bold tracking-widest">Кліки</div>
+                                    <div class="text-5xl font-black text-primary-400" id="click-display">0</div>
+                                </div>
+                            </div>
+
+                            <button id="record-btn" onclick="handleRecordClick()" class="relative z-10 w-full sm:w-auto px-12 py-6 bg-primary-600 hover:bg-primary-500 active:bg-primary-800 active:scale-95 text-white font-black text-3xl rounded-3xl transition-all shadow-[0_10px_0_#3730A3] active:shadow-[0_0px_0_#3730A3] active:translate-y-2">
+                                СТАРТ!
+                            </button>
+
+                            <div id="record-result" class="hidden mt-8 text-2xl font-bold text-accent-500 relative z-10 animate-bounce"></div>
+                        </div>
+
+                        <!-- Simulator 2: Reaction Time -->
+                        <div class="bg-indigo-900 text-white p-8 rounded-3xl border-4 border-indigo-600 shadow-xl text-center relative overflow-hidden mb-8">
+                            <h3 class="font-black text-3xl mb-2 text-accent-400">⏱️ Челендж 2: Рекорд реакції!</h3>
+                            <p class="text-xl text-indigo-200 mb-6">Як швидко ти відреагуєш на зелений колір? Середній час людини — 0.25 сек (250 мс).</p>
+                            <button id="react-btn" onclick="handleReactClick()" class="w-full sm:w-auto px-12 py-8 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-2xl rounded-3xl transition-all shadow-[0_8px_0_#312e81]">
+                                Почати тест
+                            </button>
+                            <div id="react-result" class="hidden mt-6 text-2xl font-bold text-accent-400"></div>
+                        </div>
+
+                        <!-- Simulator 3: Typing -->
+                        <div class="bg-teal-900 text-white p-8 rounded-3xl border-4 border-teal-600 shadow-xl text-center mb-8">
+                            <h3 class="font-black text-3xl mb-2 text-accent-400">⌨️ Челендж 3: Швидкодрук!</h3>
+                            <p class="text-xl text-teal-200 mb-6">Надрукуй фразу <b>«Я встановлюю новий рекорд»</b> якомога швидше.</p>
+                            <input type="text" id="type-input" oninput="checkTyping()" onfocus="startTyping()" class="w-full max-w-lg mx-auto block px-6 py-4 rounded-2xl text-slate-900 text-2xl font-bold mb-4" placeholder="Почни вводити тут...">
+                            <div id="type-result" class="hidden text-2xl font-bold text-accent-400"></div>
+                        </div>
+
+                        <!-- Simulator 4: Stopwatch -->
+                        <div class="bg-rose-900 text-white p-8 rounded-3xl border-4 border-rose-600 shadow-xl text-center mb-8">
+                            <h3 class="font-black text-3xl mb-2 text-accent-400">⏳ Челендж 4: Відчуття часу!</h3>
+                            <p class="text-xl text-rose-200 mb-6">Зупини секундомір рівно на <b>3.00</b> секундах. Відчуй час!</p>
+                            <div class="text-6xl font-black text-white mb-6" id="stopwatch-display">0.00</div>
+                            <button id="stopwatch-btn" onclick="toggleStopwatch()" class="px-12 py-6 bg-rose-600 hover:bg-rose-500 text-white font-black text-2xl rounded-3xl transition-all shadow-[0_8px_0_#881337]">СТАРТ</button>
+                            <div id="stopwatch-result" class="hidden mt-6 text-2xl font-bold text-accent-400"></div>
+                        </div>
+
+                        <!-- Simulator 5: Memory -->
+                        <div class="bg-fuchsia-900 text-white p-8 rounded-3xl border-4 border-fuchsia-600 shadow-xl text-center">
+                            <h3 class="font-black text-3xl mb-2 text-accent-400">🧠 Челендж 5: Суперпам'ять!</h3>
+                            <p class="text-xl text-fuchsia-200 mb-6">Запам'ятай 6 цифр, які з'являться рівно на 2 секунди.</p>
+                            <div id="mem-display" class="text-6xl font-black tracking-widest text-white mb-6 h-16">❓❓❓❓❓❓</div>
+                            <button id="mem-start-btn" onclick="startMemory()" class="px-12 py-6 bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-black text-2xl rounded-3xl transition-all shadow-[0_8px_0_#701a75] mb-6">Показати цифри</button>
+                            
+                            <div id="mem-input-area" class="hidden">
+                                <input type="number" id="mem-input" class="w-full max-w-sm mx-auto block px-6 py-4 rounded-2xl text-slate-900 text-3xl font-bold tracking-widest text-center mb-4" placeholder="Введи цифри">
+                                <button onclick="checkMemory()" class="px-8 py-4 bg-accent-500 hover:bg-accent-600 text-white font-black text-xl rounded-2xl transition-all shadow-md">Перевірити</button>
+                            </div>
+                            <div id="mem-result" class="hidden mt-6 text-2xl font-bold text-accent-400"></div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 2,
+                title: "2. Молоді читачі",
+                icon: "📚",
+                render: () => `
+                    <div class="fade-in max-w-4xl mx-auto pb-10">
+                        <h2 class="text-3xl md:text-5xl font-black text-slate-800 mb-6 flex items-center gap-4">
+                            📚 День молодих читачів
+                        </h2>
+                        
+                        <div class="grid md:grid-cols-2 gap-6 mb-10 text-xl">
+                            <div class="bg-green-50 p-6 rounded-3xl border-2 border-green-100 shadow-sm">
+                                <h3 class="text-2xl font-bold text-green-800 mb-3">🧠 Суперсила мозку</h3>
+                                <p class="text-slate-700">Читання розвиває уяву краще за будь-які фільми чи відеоігри. Коли ми читаємо, наш мозок сам створює спецефекти!</p>
+                            </div>
+                            <div class="bg-purple-50 p-6 rounded-3xl border-2 border-purple-100 shadow-sm">
+                                <h3 class="text-2xl font-bold text-purple-800 mb-3">⏱️ Швидкість</h3>
+                                <p class="text-slate-700">Середня людина читає близько 200-250 слів за хвилину. А чемпіони зі швидкісного читання — понад 1000 слів!</p>
+                            </div>
+                        </div>
+
+                        <!-- Simulator: Emoji Books -->
+                        <div class="bg-white p-8 rounded-3xl border-4 border-slate-100 shadow-lg mb-8">
+                            <h3 class="font-bold text-3xl text-slate-800 mb-6 text-center">🕵️ Гра: Вгадай книгу за емодзі</h3>
+                            <p class="text-xl text-center text-slate-500 mb-8">Натисніть на картку, щоб перевірити свою здогадку!</p>
+                            
+                            <div class="grid sm:grid-cols-2 gap-6">
+                                ${generateEmojiBook('book1', '👦 ⚡ 👓 🦉 🪄', 'Гаррі Поттер')}
+                                ${generateEmojiBook('book2', '🍫 🏭 🎩 👦 🎫', 'Чарлі і шоколадна фабрика')}
+                                ${generateEmojiBook('book3', '🤴 🌹 🦊 🪐 ✈️', 'Маленький принц')}
+                                ${generateEmojiBook('book4', '👧 🐇 🕳️ ☕ 🎩', 'Аліса в Країні Див')}
+                                ${generateEmojiBook('book5', '🏴‍☠️ 🗺️ 🦜 💰 ⛵', 'Острів скарбів')}
+                                ${generateEmojiBook('book6', '💍 🌋 🧝‍♂️ 🧙‍♂️ 🦅', 'Володар перснів')}
+                            </div>
+                        </div>
+
+                        <!-- Mini Quiz: Guess the Character -->
+                        <div class="bg-purple-50 p-8 rounded-3xl border-4 border-purple-200 shadow-sm text-center">
+                            <h3 class="font-bold text-3xl text-purple-900 mb-8">✍️ Хто це сказав? (Цитати з книг)</h3>
+                            
+                            <div class="mb-8 border-b-2 border-purple-200 pb-8">
+                                <p class="text-2xl text-slate-700 italic mb-6">«Ми відповідальні за тих, кого приручили...»</p>
+                                <button onclick="this.nextElementSibling.classList.remove('hidden'); this.classList.add('hidden');" class="px-8 py-4 bg-purple-600 text-white font-bold text-xl rounded-2xl hover:bg-purple-500 transition shadow-md">Показати відповідь</button>
+                                <p class="hidden mt-4 text-3xl font-black text-purple-900 fade-in">🦊 Лис («Маленький принц»)</p>
+                            </div>
+
+                            <div class="mb-8 border-b-2 border-purple-200 pb-8">
+                                <p class="text-2xl text-slate-700 italic mb-6">«Слова — це, на моє не дуже скромне переконання, наше найвичерпніше джерело магії.»</p>
+                                <button onclick="this.nextElementSibling.classList.remove('hidden'); this.classList.add('hidden');" class="px-8 py-4 bg-purple-600 text-white font-bold text-xl rounded-2xl hover:bg-purple-500 transition shadow-md">Показати відповідь</button>
+                                <p class="hidden mt-4 text-3xl font-black text-purple-900 fade-in">🧙‍♂️ Албус Дамблдор («Гаррі Поттер»)</p>
+                            </div>
+
+                            <div class="mb-8 border-b-2 border-purple-200 pb-8">
+                                <p class="text-2xl text-slate-700 italic mb-6">«Потрібно бігти з усіх ніг, щоб тільки залишатися на місці, а щоб кудись потрапити, треба бігти щонайменше вдвічі швидше!»</p>
+                                <button onclick="this.nextElementSibling.classList.remove('hidden'); this.classList.add('hidden');" class="px-8 py-4 bg-purple-600 text-white font-bold text-xl rounded-2xl hover:bg-purple-500 transition shadow-md">Показати відповідь</button>
+                                <p class="hidden mt-4 text-3xl font-black text-purple-900 fade-in">👑 Чорна Королева («Аліса в Країні Див»)</p>
+                            </div>
+
+                            <div class="mb-8 border-b-2 border-purple-200 pb-8">
+                                <p class="text-2xl text-slate-700 italic mb-6">«Все, що нам потрібно вирішити — це що робити з часом, який нам дано.»</p>
+                                <button onclick="this.nextElementSibling.classList.remove('hidden'); this.classList.add('hidden');" class="px-8 py-4 bg-purple-600 text-white font-bold text-xl rounded-2xl hover:bg-purple-500 transition shadow-md">Показати відповідь</button>
+                                <p class="hidden mt-4 text-3xl font-black text-purple-900 fade-in">🧙‍♂️ Гендальф («Володар перснів»)</p>
+                            </div>
+
+                            <div>
+                                <p class="text-2xl text-slate-700 italic mb-6">«Хай щастя завжди буде на вашому боці!»</p>
+                                <button onclick="this.nextElementSibling.classList.remove('hidden'); this.classList.add('hidden');" class="px-8 py-4 bg-purple-600 text-white font-bold text-xl rounded-2xl hover:bg-purple-500 transition shadow-md">Показати відповідь</button>
+                                <p class="hidden mt-4 text-3xl font-black text-purple-900 fade-in">🏹 Еффі Тринькіт («Голодні ігри»)</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 3,
+                title: "3. День винахідника",
+                icon: "💡",
+                render: () => `
+                    <div class="fade-in max-w-4xl mx-auto pb-10">
+                        <h2 class="text-3xl md:text-5xl font-black text-slate-800 mb-6 flex items-center gap-4">
+                            💡 Міжнародний день винахідника
+                        </h2>
+                        
+                        <p class="text-2xl text-slate-700 mb-8 leading-relaxed bg-accent-100 p-6 rounded-3xl border-2 border-accent-500 shadow-sm">
+                            Без винахідників ми б досі сиділи в печерах! Цей день відзначають у день народження Геді Ламар — актриси та винахідниці, яка розробила принцип для <b>Wi-Fi</b> та <b>Bluetooth</b>. 
+                            А чи знали ви, що <b>Леонардо да Вінчі</b> малював креслення гелікоптера ще 500 років тому, а <b>Брати Райт</b> здійснили перший успішний політ на літаку у 1903 році?
+                        </p>
+
+                        <!-- Simulator 1: Circuit Builder -->
+                        <div class="bg-slate-800 p-8 rounded-3xl shadow-xl text-center border-4 border-slate-700 mb-8">
+                            <h3 class="font-bold text-3xl text-white mb-4">🛠️ Симулятор 1: Збери електричне коло</h3>
+                            <p class="text-xl text-slate-400 mb-8">Щоб лампочка загорілася, винахіднику потрібно з'єднати всі елементи.</p>
+                            
+                            <div class="flex justify-center mb-10">
+                                <div id="sim-bulb" class="text-9xl bulb-off">💡</div>
+                            </div>
+                            
+                            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                                <button onclick="toggleCircuitPart('battery', this)" class="px-6 py-4 bg-slate-600 text-white font-bold text-xl rounded-2xl hover:bg-slate-500 transition border-b-4 border-slate-900">
+                                    🔋 Додати батарею
+                                </button>
+                                <button onclick="toggleCircuitPart('wire', this)" class="px-6 py-4 bg-slate-600 text-white font-bold text-xl rounded-2xl hover:bg-slate-500 transition border-b-4 border-slate-900">
+                                    🪢 Під'єднати провід
+                                </button>
+                                <button onclick="toggleCircuitPart('switch', this)" class="px-6 py-4 bg-slate-600 text-white font-bold text-xl rounded-2xl hover:bg-slate-500 transition border-b-4 border-slate-900">
+                                    🔘 Увімкнути вимикач
+                                </button>
+                            </div>
+                            
+                            <div id="circuit-success" class="hidden mt-8 text-3xl font-black text-accent-500 animate-pulse">
+                                Еврика! Світло є! 🎉
+                            </div>
+                        </div>
+
+                        <!-- Simulator 2: Airplane -->
+                        <div class="bg-sky-100 p-8 rounded-3xl shadow-xl text-center border-4 border-sky-300 relative overflow-hidden mb-8">
+                            <h3 class="font-bold text-3xl text-sky-900 mb-4">✈️ Симулятор 2: Запуск першого літака</h3>
+                            <p class="text-xl text-sky-700 mb-6">Відрегулюй потужність двигуна братів Райт та запусти літак!</p>
+                            
+                            <input type="range" id="plane-power" min="10" max="100" value="50" class="w-full max-w-md mx-auto block mb-6 cursor-pointer">
+                            
+                            <div class="h-24 bg-sky-200 rounded-full mb-6 relative overflow-hidden border-2 border-sky-400 flex items-center">
+                                <div id="plane-icon" class="absolute left-2 text-6xl transition-all duration-[1500ms] ease-out" style="left: 2%;">🛩️</div>
+                            </div>
+                            
+                            <button onclick="launchPlane()" class="px-10 py-4 bg-sky-600 text-white font-black text-2xl rounded-2xl hover:bg-sky-500 transition shadow-lg">
+                                ПУСК!
+                            </button>
+                        </div>
+
+                        <!-- Simulator 3: RGB Mixing -->
+                        <div class="bg-emerald-900 p-8 rounded-3xl shadow-xl text-center border-4 border-emerald-700 mb-8 text-white">
+                            <h3 class="font-bold text-3xl mb-4 text-accent-400">🎨 Симулятор 3: Кольоровий дисплей (RGB)</h3>
+                            <p class="text-xl text-emerald-200 mb-6">Усі екрани використовують 3 кольори. Змішай їх так, щоб отримати <b>жовтий</b> колір.</p>
+                            <div id="rgb-box" class="w-32 h-32 mx-auto rounded-full bg-black border-4 border-white mb-6 shadow-inner transition-colors duration-200"></div>
+                            <div class="max-w-md mx-auto space-y-4">
+                                <input type="range" id="sl-r" min="0" max="255" value="0" oninput="updateRGB()" class="w-full accent-red-500">
+                                <input type="range" id="sl-g" min="0" max="255" value="0" oninput="updateRGB()" class="w-full accent-green-500">
+                                <input type="range" id="sl-b" min="0" max="255" value="0" oninput="updateRGB()" class="w-full accent-blue-500">
+                            </div>
+                            <div id="rgb-success" class="hidden mt-6 text-2xl font-bold text-accent-400"></div>
+                        </div>
+                        
+                        <!-- Simulator 4: Morse Code -->
+                        <div class="bg-orange-900 p-8 rounded-3xl shadow-xl text-center border-4 border-orange-700 mb-8 text-white">
+                            <h3 class="font-bold text-3xl mb-4 text-accent-400">📟 Симулятор 4: Телеграф Морзе</h3>
+                            <p class="text-xl text-orange-200 mb-6">Надрукуй щось англійською, щоб зашифрувати це знаменитою азбукою Морзе!</p>
+                            <input type="text" id="morse-input" oninput="translateMorse()" class="w-full max-w-lg mx-auto block px-6 py-4 rounded-2xl text-slate-900 text-2xl font-bold mb-6 text-center uppercase" placeholder="HELLO">
+                            <div id="morse-output" class="text-4xl font-black tracking-widest text-orange-300 min-h-[3rem] break-words"></div>
+                        </div>
+                        
+                        <!-- Simulator 5: Gravity -->
+                        <div class="bg-cyan-900 p-8 rounded-3xl shadow-xl text-center border-4 border-cyan-700 text-white relative overflow-hidden">
+                            <h3 class="font-bold text-3xl mb-4 text-accent-400">🍎 Симулятор 5: Закон тяжіння (Ньютон)</h3>
+                            <p class="text-xl text-cyan-200 mb-6">Обери планету та відпусти яблуко, щоб побачити різницю у силі тяжіння.</p>
+                            
+                            <select id="gravity-planet" class="px-6 py-3 rounded-xl text-slate-900 text-xl font-bold mb-6 mx-auto block">
+                                <option value="9.8">Земля (Звичайна швидкість)</option>
+                                <option value="1.6">Місяць (Повільно)</option>
+                                <option value="24.7">Юпітер (Дуже швидко)</option>
+                            </select>
+                            
+                            <div class="h-64 bg-cyan-950 rounded-2xl relative border-2 border-cyan-800 overflow-hidden w-full max-w-sm mx-auto mb-6">
+                                <div id="gravity-apple" class="absolute top-2 left-1/2 -translate-x-1/2 text-6xl">🍎</div>
+                                <div class="absolute bottom-0 w-full h-4 bg-green-800"></div>
+                            </div>
+                            
+                            <button onclick="dropApple()" class="px-10 py-4 bg-cyan-600 text-white font-black text-2xl rounded-2xl hover:bg-cyan-500 transition shadow-lg">
+                                Відпустити
+                            </button>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 4,
+                title: "4. Мега-Вікторина",
+                icon: "🧠",
+                render: () => `
+                    <div class="fade-in max-w-4xl mx-auto pb-10">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+                            <h2 class="text-3xl md:text-5xl font-black text-slate-800">
+                                🧠 Мега-Вікторина
+                            </h2>
+                            <div class="bg-primary-600 text-white px-6 py-3 rounded-2xl font-bold text-2xl shadow-lg">
+                                Твій рахунок: ${score}/12
+                            </div>
+                        </div>
+                        
+                        <p class="text-2xl text-slate-600 mb-8">Перевіримо, як уважно ви слухали! За кожну правильну відповідь нараховується 1 бал.</p>
+
+                        ${generateQuiz(1, "Питання 1", 
+                            "Коли була опублікована перша «Книга рекордів Гіннеса»?",
+                            [
+                                { text: "У 1900 році", correct: false, reason: "Ні, тоді про таку книгу ще ніхто не думав." },
+                                { text: "У 1955 році", correct: true, reason: "Абсолютно точно! 27 серпня 1955 року вийшов перший екземпляр." },
+                                { text: "У 2000 році", correct: false, reason: "Ця книга набагато старіша!" }
+                            ]
+                        )}
+
+                        ${generateQuiz(2, "Питання 2", 
+                            "Скільки слів за хвилину в середньому читає звичайна людина?",
+                            [
+                                { text: "Близько 50 слів", correct: false, reason: "Це занадто повільно для дорослої людини." },
+                                { text: "Близько 200-250 слів", correct: true, reason: "Правильно! Саме стільки читає більшість людей." },
+                                { text: "Понад 1000 слів", correct: false, reason: "Це рівень чемпіонів зі швидкісного читання." }
+                            ]
+                        )}
+
+                        ${generateQuiz(3, "Питання 3", 
+                            "Яку повсякденну сучасну технологію допомогла створити винахідниця Геді Ламар?",
+                            [
+                                { text: "Мікрохвильову піч", correct: false, reason: "Її винайшов Персі Спенсер." },
+                                { text: "Wi-Fi та Bluetooth", correct: true, reason: "Саме так! Її ідея 'стрибаючих частот' стала основою для бездротового зв'язку." },
+                                { text: "Електричну лампочку", correct: false, reason: "Лампочку вдосконалив Томас Едісон." }
+                            ]
+                        )}
+
+                        ${generateQuiz(4, "Питання 4", 
+                            "Хто винайшов двірники (склоочисники) для автомобілів?",
+                            [
+                                { text: "Мері Андерсон", correct: true, reason: "Правильно! У 1903 році жінка на ім'я Мері Андерсон запатентувала перші двірники." },
+                                { text: "Генрі Форд", correct: false, reason: "Генрі Форд створив масове виробництво авто, але не двірники." },
+                                { text: "Альберт Ейнштейн", correct: false, reason: "Він був зайнятий фізикою, а не автомобілями." }
+                            ]
+                        )}
+
+                        ${generateQuiz(5, "Питання 5", 
+                            "Яка книга у світі є найбільш продаваною (після релігійних текстів)?",
+                            [
+                                { text: "Гаррі Поттер і філософський камінь", correct: false, reason: "Дуже популярна, але трохи поступається лідеру." },
+                                { text: "Дон Кіхот", correct: true, reason: "Так! Цей шедевр Мігеля де Сервантеса вважається найбільш тиражованою художньою книгою." },
+                                { text: "Володар Перснів", correct: false, reason: "Це фантастична книга, але вона на третьому місці." }
+                            ]
+                        )}
+
+                        ${generateQuiz(6, "Питання 6", 
+                            "Який птах є найшвидшим у світі (згідно з рекордами Гіннеса)?",
+                            [
+                                { text: "Страус", correct: false, reason: "Страус швидко бігає, але не літає." },
+                                { text: "Сапсан", correct: true, reason: "Правильно! Сапсан у піке може розвивати швидкість понад 300 км/год." },
+                                { text: "Орел", correct: false, reason: "Орли швидкі, але сапсан залишається абсолютним рекордсменом." }
+                            ]
+                        )}
+
+                        ${generateQuiz(7, "Питання 7", 
+                            "Який винахід приписують братам Райт?",
+                            [
+                                { text: "Автомобіль", correct: false, reason: "Масове виробництво авто почав Форд." },
+                                { text: "Літак", correct: true, reason: "Так! У 1903 році вони здійснили перший керований політ." },
+                                { text: "Паровоз", correct: false, reason: "Це винахід Річарда Тревітіка та Джорджа Стівенсона." }
+                            ]
+                        )}
+
+                        ${generateQuiz(8, "Питання 8", 
+                            "Хто намалював одні з перших ескізів парашута та гелікоптера?",
+                            [
+                                { text: "Альберт Ейнштейн", correct: false, reason: "Він розробляв теорію відносності, а не ескізи літальних апаратів." },
+                                { text: "Леонардо да Вінчі", correct: true, reason: "Правильно! Його креслення випередили час на століття." },
+                                { text: "Ісаак Ньютон", correct: false, reason: "Ньютон відкрив закони гравітації та механіки." }
+                            ]
+                        )}
+
+                        ${generateQuiz(9, "Питання 9", 
+                            "Хто з українських письменників написав славетний «Кобзар»?",
+                            [
+                                { text: "Леся Українка", correct: false, reason: "Видатна поетеса, але авторка інших творів." },
+                                { text: "Тарас Шевченко", correct: true, reason: "Точно! Ця книга є однією з найвизначніших в українській літературі." },
+                                { text: "Іван Франко", correct: false, reason: "Він написав 'Каменярі' та 'Захар Беркут'." }
+                            ]
+                        )}
+
+                        ${generateQuiz(10, "Питання 10", 
+                            "Що винайшов Олександр Грем Белл?",
+                            [
+                                { text: "Телевізор", correct: false, reason: "Телевізор винайшли значно пізніше." },
+                                { text: "Телефон", correct: true, reason: "Так! Він отримав патент на цей винахід у 1876 році." },
+                                { text: "Радіо", correct: false, reason: "Винахід радіо приписують Марконі та Теслі." }
+                            ]
+                        )}
+
+                        ${generateQuiz(11, "Питання 11", 
+                            "Як звати 'хлопчика, який вижив' у популярній серії книг?",
+                            [
+                                { text: "Пітер Пен", correct: false, reason: "Це хлопчик, який не хотів дорослішати." },
+                                { text: "Гаррі Поттер", correct: true, reason: "Правильно! Це найвідоміший чарівник сучасної літератури." },
+                                { text: "Фродо", correct: false, reason: "Фродо ніс перстень у Мордор." }
+                            ]
+                        )}
+
+                        ${generateQuiz(12, "Питання 12", 
+                            "Скільки кольорів має класичний кубик Рубіка (один із найвідоміших винаходів-головоломок)?",
+                            [
+                                { text: "4", correct: false, reason: "Занадто мало для справжньої головоломки." },
+                                { text: "6", correct: true, reason: "Правильно! Кожна з 6 граней має свій колір." },
+                                { text: "8", correct: false, reason: "У нього 8 кутів, але граней і кольорів — 6." }
+                            ]
+                        )}
+                    </div>
+                `
+            },
+            {
+                id: 5,
+                title: "5. Підсумок",
+                icon: "🏅",
+                render: () => {
+                    let message = "";
+                    let bgColor = "";
+                    let emoji = "";
+                    
+                    if (score <= 5) {
+                        message = "Гарна спроба! Ти дізнався багато нового сьогодні. Знання — це сила, тому продовжуй досліджувати світ, читати книги та цікавитися винаходами. Рекомендуємо частіше читати енциклопедії!";
+                        bgColor = "bg-blue-50 border-blue-200 text-blue-900";
+                        emoji = "🌱";
+                    } else if (score <= 9) {
+                        message = "Чудовий результат! Ти маєш міцні знання і чудову пам'ять. Хто знає, можливо, наступний великий винахід чи рекорд Гіннеса належатиме саме тобі! Побажання: не зупиняйся на досягнутому!";
+                        bgColor = "bg-primary-50 border-primary-300 text-primary-900";
+                        emoji = "🚀";
+                    } else {
+                        message = "Ідеально! Блискучий результат! Ти справжній ерудит та майбутній геній. Твої знання про події 9 листопада просто вражають. Бажаємо завжди залишатися таким же допитливим!";
+                        bgColor = "bg-accent-50 border-accent-400 text-accent-900";
+                        emoji = "👑";
+                    }
+
+                    return `
+                    <div class="fade-in max-w-4xl mx-auto text-center py-10">
+                        <h2 class="text-4xl md:text-6xl font-black text-slate-800 mb-10">
+                            🎉 Фінальний результат
+                        </h2>
+                        
+                        <div class="inline-block relative mb-12">
+                            <div class="w-56 h-56 rounded-full bg-white flex items-center justify-center border-[12px] border-primary-500 shadow-2xl mx-auto relative z-10">
+                                <span class="text-8xl font-black text-primary-600">${score}<span class="text-5xl text-primary-300">/12</span></span>
+                            </div>
+                            <div class="absolute -top-6 -right-6 text-7xl animate-bounce z-20 drop-shadow-lg">${emoji}</div>
+                            <div class="absolute inset-0 bg-primary-200 rounded-full blur-3xl opacity-50 z-0"></div>
+                        </div>
+
+                        <div class="p-10 rounded-[2rem] border-4 ${bgColor} shadow-xl mb-10">
+                            <p class="text-3xl font-bold leading-relaxed">${message}</p>
+                        </div>
+
+                        <button onclick="navigate(1); resetGame();" class="mt-8 px-10 py-5 bg-slate-800 text-white font-black text-2xl rounded-3xl hover:bg-slate-700 transition shadow-2xl hover:-translate-y-1">
+                            🔄 Почати спочатку
+                        </button>
+                    </div>
+                `
+                }
+            }
+        ];
+
+        // --- Helper for Emoji Books ---
+        function generateEmojiBook(id, emojis, answer) {
+            return `
+                <div class="emoji-card bg-primary-50 border-2 border-primary-100 p-6 rounded-3xl text-center" onclick="document.getElementById('ans-${id}').classList.remove('hidden')">
+                    <div class="text-5xl mb-4 tracking-widest">${emojis}</div>
+                    <div class="text-lg font-bold text-primary-600 uppercase mb-2">Натисни, щоб дізнатися</div>
+                    <div id="ans-${id}" class="hidden text-2xl font-black text-slate-800 bg-white p-3 rounded-xl shadow-inner mt-4 border-2 border-primary-200 fade-in">
+                        📖 ${answer}
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- Quiz Helper ---
+        function generateQuiz(id, title, desc, answers) {
+            let btns = answers.map((ans) => `
+                <button onclick="answerQuiz(${id}, ${ans.correct}, this, '${ans.reason.replace(/'/g, "\\'")}')" 
+                        class="text-left p-6 text-2xl font-bold border-4 border-slate-100 rounded-3xl hover:bg-primary-50 hover:border-primary-200 transition w-full shadow-sm mb-4">
+                    ${ans.text}
+                </button>
+            `).join('');
+
+            return `
+                <div class="mb-12 border-4 border-slate-100 rounded-[2rem] overflow-hidden shadow-lg bg-white">
+                    <div class="bg-primary-50 p-8 border-b-4 border-slate-100">
+                        <h3 class="font-black text-3xl flex items-center gap-3 mb-4 text-primary-800">${title}</h3>
+                        <p class="text-2xl text-slate-700 leading-relaxed font-semibold">${desc}</p>
+                    </div>
+                    <div class="p-8" id="quiz-${id}-container">
+                        <div class="flex flex-col">
+                            ${btns}
+                        </div>
+                        <div id="quiz-${id}-feedback" class="mt-6 text-2xl font-bold hidden p-6 rounded-2xl border-4"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- Core Navigation ---
+        function initApp() {
+            renderNav();
+            renderContent();
+        }
+
+        function renderNav() {
+            const navContainer = document.getElementById('nav-container');
+            navContainer.innerHTML = blocks.map(block => `
+                <button onclick="navigate(${block.id})" 
+                    class="flex items-center gap-4 text-left w-full px-5 py-5 rounded-2xl transition-all duration-200 border-4 ${
+                        activeBlockId === block.id 
+                        ? 'bg-primary-600 border-primary-600 text-white shadow-xl scale-[1.02]' 
+                        : 'bg-white border-transparent text-slate-600 hover:bg-primary-50 hover:border-primary-100'
+                    }">
+                    <span class="text-4xl drop-shadow-md">${block.icon}</span>
+                    <span class="text-xl font-black">${block.title.split('. ')[1] || block.title}</span>
+                </button>
+            `).join('');
+        }
+
+        function renderContent() {
+            const contentArea = document.getElementById('content-area');
+            const block = blocks.find(b => b.id === activeBlockId);
+            contentArea.innerHTML = block.render();
+            contentArea.scrollTop = 0;
+            
+            // Reset state for simulators when navigating
+            resetSimulators();
+        }
+
+        function navigate(id) {
+            activeBlockId = id;
+            renderNav();
+            renderContent();
+        }
+
+        function resetGame() {
+            score = 0;
+            answeredQuizzes.clear();
+            document.getElementById('score-display').innerText = score;
+        }
+
+        function resetSimulators() {
+            // Clicker reset
+            clickCount = 0;
+            clickTimeLeft = 5.0;
+            gameActive = false;
+            if(clickTimer) clearInterval(clickTimer);
+            
+            // Circuit reset
+            circuit = { battery: false, wire: false, switch: false };
+            
+            // React reset
+            reactState = 'idle';
+            if(reactTimeout) clearTimeout(reactTimeout);
+
+            // New states reset
+            typingStart = 0;
+            if(stopInterval) clearInterval(stopInterval);
+            stopActive = false;
+        }
+
+        // --- Simulator 1 Logic (Click Record) ---
+        function handleRecordClick() {
+            const btn = document.getElementById('record-btn');
+            const clickDisp = document.getElementById('click-display');
+            const timeDisp = document.getElementById('timer-display');
+            const resultBox = document.getElementById('record-result');
+
+            if (!gameActive && clickTimeLeft === 5) {
+                // Start game
+                gameActive = true;
+                clickCount = 1;
+                btn.innerText = "КЛІКАЙ!";
+                btn.classList.add('bg-accent-500');
+                btn.classList.remove('bg-primary-600');
+                resultBox.classList.add('hidden');
+                
+                clickTimer = setInterval(() => {
+                    clickTimeLeft -= 0.1;
+                    if(clickTimeLeft <= 0) {
+                        endRecordGame();
+                    } else {
+                        timeDisp.innerText = clickTimeLeft.toFixed(1);
+                    }
+                }, 100);
+            } else if (gameActive) {
+                // Register click
+                clickCount++;
+            }
+            
+            clickDisp.innerText = clickCount;
+        }
+
+        function endRecordGame() {
+            clearInterval(clickTimer);
+            gameActive = false;
+            document.getElementById('timer-display').innerText = "0.0";
+            
+            const btn = document.getElementById('record-btn');
+            btn.innerText = "Спробувати ще";
+            btn.classList.remove('bg-accent-500');
+            btn.classList.add('bg-primary-600');
+            
+            const resultBox = document.getElementById('record-result');
+            resultBox.classList.remove('hidden');
+            resultBox.innerHTML = `Твій рекорд: <b>${clickCount}</b> кліків! Це приблизно ${(clickCount/5).toFixed(1)} кліків за секунду. 🚀`;
+            
+            // Allow restart
+            clickTimeLeft = 5;
+        }
+
+        // --- Simulator 3 Logic (Circuit) ---
+        function toggleCircuitPart(part, btnElement) {
+            circuit[part] = !circuit[part]; // Toggle state
+            
+            if (circuit[part]) {
+                btnElement.classList.replace('bg-slate-600', 'bg-accent-500');
+                btnElement.classList.replace('border-slate-900', 'border-accent-700');
+                btnElement.innerHTML = btnElement.innerHTML.replace('Додати', 'Додано').replace('Під\'єднати', 'Під\'єднано').replace('Увімкнути', 'Увімкнено');
+            } else {
+                btnElement.classList.replace('bg-accent-500', 'bg-slate-600');
+                btnElement.classList.replace('border-accent-700', 'border-slate-900');
+                btnElement.innerHTML = btnElement.innerHTML.replace('Додано', 'Додати').replace('Під\'єднано', 'Під\'єднати').replace('Увімкнено', 'Увімкнути');
+            }
+
+            checkCircuit();
+        }
+
+        function checkCircuit() {
+            const bulb = document.getElementById('sim-bulb');
+            const msg = document.getElementById('circuit-success');
+            
+            if (circuit.battery && circuit.wire && circuit.switch) {
+                bulb.classList.replace('bulb-off', 'bulb-on');
+                msg.classList.remove('hidden');
+            } else {
+                bulb.classList.replace('bulb-on', 'bulb-off');
+                msg.classList.add('hidden');
+            }
+        }
+        
+        // --- Reaction Simulator Logic ---
+        function handleReactClick() {
+            const btn = document.getElementById('react-btn');
+            const res = document.getElementById('react-result');
+            
+            if (reactState === 'idle' || reactState === 'done') {
+                reactState = 'waiting';
+                res.classList.add('hidden');
+                btn.innerText = "Чекай на зелений...";
+                btn.className = "w-full sm:w-auto px-12 py-8 bg-red-600 text-white font-black text-2xl rounded-3xl transition-all shadow-[0_8px_0_#991b1b]";
+                
+                const waitTime = 1000 + Math.random() * 3000;
+                reactTimeout = setTimeout(() => {
+                    reactState = 'ready';
+                    reactStartTime = Date.now();
+                    btn.innerText = "ТИСНИ!!!";
+                    btn.className = "w-full sm:w-auto px-12 py-8 bg-green-500 text-white font-black text-4xl rounded-3xl transition-all shadow-[0_8px_0_#166534]";
+                }, waitTime);
+            } else if (reactState === 'waiting') {
+                clearTimeout(reactTimeout);
+                reactState = 'idle';
+                btn.innerText = "Зарано! Спробуй ще";
+                btn.className = "w-full sm:w-auto px-12 py-8 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-2xl rounded-3xl transition-all shadow-[0_8px_0_#312e81]";
+            } else if (reactState === 'ready') {
+                const reactionTime = Date.now() - reactStartTime;
+                reactState = 'done';
+                btn.innerText = "Почати знову";
+                btn.className = "w-full sm:w-auto px-12 py-8 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-2xl rounded-3xl transition-all shadow-[0_8px_0_#312e81]";
+                res.classList.remove('hidden');
+                res.innerHTML = `Твій час: <b>${reactionTime} мс</b>! ${reactionTime < 250 ? 'Блискавично ⚡' : 'Непогано 👍'}`;
+            }
+        }
+        
+        // --- Airplane Logic ---
+        function launchPlane() {
+            const power = document.getElementById('plane-power').value;
+            const plane = document.getElementById('plane-icon');
+            // Max distance up to 85% of container to prevent overflow
+            const distance = (power / 100) * 85; 
+            
+            plane.style.transition = 'none';
+            plane.style.left = '2%';
+            
+            // force reflow
+            void plane.offsetWidth;
+            
+            plane.style.transition = 'left 1.5s cubic-bezier(0.25, 1, 0.5, 1)';
+            plane.style.left = `${distance}%`;
+        }
+
+        // --- NEW SIMULATORS LOGIC ---
+        // Typing
+        function startTyping() {
+            if(typingStart === 0) typingStart = Date.now();
+        }
+        function checkTyping() {
+            const val = document.getElementById('type-input').value;
+            if(val === 'Я встановлюю новий рекорд') {
+                const time = ((Date.now() - typingStart)/1000).toFixed(2);
+                document.getElementById('type-result').innerHTML = `Готово! Твій час: <b>${time} сек</b> 🏆`;
+                document.getElementById('type-result').classList.remove('hidden');
+                document.getElementById('type-input').disabled = true;
+            }
+        }
+        
+        // Stopwatch
+        function toggleStopwatch() {
+            const btn = document.getElementById('stopwatch-btn');
+            const disp = document.getElementById('stopwatch-display');
+            const res = document.getElementById('stopwatch-result');
+            
+            if(!stopActive) {
+                stopActive = true;
+                stopStart = Date.now();
+                btn.innerText = "ЗУПИНИТИ";
+                btn.classList.replace('bg-rose-600', 'bg-red-500');
+                res.classList.add('hidden');
+                disp.innerText = "0.00";
+                
+                stopInterval = setInterval(() => {
+                    disp.innerText = ((Date.now() - stopStart)/1000).toFixed(2);
+                }, 50);
+            } else {
+                stopActive = false;
+                clearInterval(stopInterval);
+                const finalTime = ((Date.now() - stopStart)/1000).toFixed(2);
+                disp.innerText = finalTime;
+                btn.innerText = "СТАРТ";
+                btn.classList.replace('bg-red-500', 'bg-rose-600');
+                
+                const diff = Math.abs(finalTime - 3.00).toFixed(2);
+                res.classList.remove('hidden');
+                if(diff === "0.00") res.innerHTML = "Ідеально! Ти володар часу! ⏳";
+                else res.innerHTML = `Похибка: <b>${diff} сек</b>. Спробуй ще!`;
+            }
+        }
+        
+        // Memory
+        function startMemory() {
+            const disp = document.getElementById('mem-display');
+            const btn = document.getElementById('mem-start-btn');
+            const inputArea = document.getElementById('mem-input-area');
+            const res = document.getElementById('mem-result');
+            const inputField = document.getElementById('mem-input');
+            
+            memTarget = Math.floor(100000 + Math.random() * 900000).toString();
+            disp.innerText = memTarget;
+            btn.classList.add('hidden');
+            res.classList.add('hidden');
+            inputArea.classList.add('hidden');
+            inputField.value = '';
+            
+            setTimeout(() => {
+                disp.innerText = "❓❓❓❓❓❓";
+                inputArea.classList.remove('hidden');
+                inputField.focus();
+            }, 2000);
+        }
+        
+        function checkMemory() {
+            const val = document.getElementById('mem-input').value;
+            const res = document.getElementById('mem-result');
+            res.classList.remove('hidden');
+            if(val === memTarget) {
+                res.innerHTML = "Чудова пам'ять! Правильно! 🧠";
+                document.getElementById('mem-start-btn').classList.remove('hidden');
+                document.getElementById('mem-input-area').classList.add('hidden');
+            } else {
+                res.innerHTML = `Помилка. Було: ${memTarget}`;
+                document.getElementById('mem-start-btn').classList.remove('hidden');
+                document.getElementById('mem-input-area').classList.add('hidden');
+            }
+        }
+        
+        // RGB
+        function updateRGB() {
+            const r = document.getElementById('sl-r').value;
+            const g = document.getElementById('sl-g').value;
+            const b = document.getElementById('sl-b').value;
+            document.getElementById('rgb-box').style.backgroundColor = `rgb(${r},${g},${b})`;
+            
+            const res = document.getElementById('rgb-success');
+            // Yellow is R > 200, G > 200, B < 50
+            if(r > 200 && g > 200 && b < 50) {
+                res.classList.remove('hidden');
+                res.innerHTML = "Блискуче! Ти створив жовтий колір! 🌟";
+            } else {
+                res.classList.add('hidden');
+            }
+        }
+        
+        // Morse
+        function translateMorse() {
+            const val = document.getElementById('morse-input').value.toUpperCase();
+            const morseMap = {
+                'A':'.-','B':'-...','C':'-.-.','D':'-..','E':'.','F':'..-.','G':'--.','H':'....','I':'..','J':'.---',
+                'K':'-.-','L':'.-..','M':'--','N':'-.','O':'---','P':'.--.','Q':'--.-','R':'.-.','S':'...','T':'-',
+                'U':'..-','V':'...-','W':'.--','X':'-..-','Y':'-.--','Z':'--..',' ':' / '
+            };
+            let out = "";
+            for(let char of val) {
+                if(morseMap[char]) out += morseMap[char] + " ";
+                else out += char + " ";
+            }
+            document.getElementById('morse-output').innerText = out;
+        }
+        
+        // Gravity
+        function dropApple() {
+            const g = parseFloat(document.getElementById('gravity-planet').value);
+            const apple = document.getElementById('gravity-apple');
+            
+            apple.style.transition = 'none';
+            apple.style.top = '8px';
+            
+            void apple.offsetWidth; // reflow
+            
+            const time = (1 / Math.sqrt(g / 9.8)).toFixed(2);
+            
+            apple.style.transition = `top ${time}s cubic-bezier(0.5, 0, 1, 1)`;
+            apple.style.top = 'calc(100% - 70px)';
+        }
+
+        // --- Quiz Logic (Block 4) ---
+        function answerQuiz(quizId, isCorrect, btnElement, reason) {
+            const container = document.getElementById(`quiz-${quizId}-container`);
+            const feedback = document.getElementById(`quiz-${quizId}-feedback`);
+            
+            if (!answeredQuizzes.has(quizId)) {
+                if (isCorrect) {
+                    score++;
+                    document.getElementById('score-display').innerText = score;
+                    // Update header score immediately too if on that view
+                    const globalScore = document.querySelector('header #score-display');
+                    if(globalScore) globalScore.innerText = score;
+                }
+                answeredQuizzes.add(quizId);
+            }
+
+            const buttons = container.querySelectorAll('button');
+            buttons.forEach(b => {
+                b.disabled = true;
+                b.classList.add('opacity-50', 'cursor-not-allowed');
+                b.classList.remove('hover:bg-primary-50', 'hover:border-primary-200');
+            });
+            
+            btnElement.classList.remove('opacity-50');
+            feedback.style.display = 'block';
+            feedback.classList.remove('hidden', 'fade-in');
+            void feedback.offsetWidth;
+            feedback.classList.add('fade-in');
+            
+            if(isCorrect) {
+                btnElement.classList.add('bg-green-100', 'border-green-500', 'text-green-900');
+                feedback.className = "mt-6 text-2xl p-6 rounded-3xl bg-green-50 border-4 border-green-300 text-green-900 fade-in";
+                feedback.innerHTML = `<b>✅ Правильно!</b><br><span class="text-xl font-medium mt-3 inline-block">${reason}</span>`;
+            } else {
+                btnElement.classList.add('bg-red-100', 'border-red-500', 'text-red-900');
+                
+                buttons.forEach(b => {
+                    if(b.getAttribute('onclick').includes('true')) {
+                        b.classList.remove('opacity-50');
+                        b.classList.add('border-green-400', 'bg-green-50');
+                    }
+                });
+
+                feedback.className = "mt-6 text-2xl p-6 rounded-3xl bg-red-50 border-4 border-red-300 text-red-900 fade-in";
+                feedback.innerHTML = `<b>❌ Помилка!</b><br><span class="text-xl font-medium mt-3 inline-block">${reason}</span>`;
+            }
+        }
+
+        // Init on load
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
